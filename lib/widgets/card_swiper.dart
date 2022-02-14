@@ -18,6 +18,15 @@ class CardSwiper extends StatelessWidget {
     //Mediante MediaQuery.of(context) vamos a conocer el tamano de nuestro dispositivo
     final size = MediaQuery.of(context).size;
 
+    if(this.movies.length ==0){
+      return Container(
+        width: double.infinity,
+        height: size.height *0.5,
+        child: Center(
+          child: CircularProgressIndicator(),
+        ), 
+      );
+    }
 
     return Container(
       width: double.infinity,
