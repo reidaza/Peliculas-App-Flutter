@@ -12,23 +12,29 @@ class MoviesProvider extends ChangeNotifier{
 
   List<Movie> onDisplayMovies = [];
   List<Movie> popularMovies = [];
+  int _popularPage = 0; 
+
   
   MoviesProvider(){
     print('MoviesProvider inicializado');
     this.getOnDisplayMovies();
     this.getPopularMovies();
   }
-
-  getOnDisplayMovies() async{
-    //Peliculas que vamos a estar mostrando
-    var url = Uri.https(_baseUrl, '/3/movie/now_playing', {
+  Future <String> _getJsonData(String endpoint, [int page = 1]) async{
+    var url = Uri.https(_baseUrl, endpoint, {
       'api_key': _apikey,
       'language': _language,
-      'page': '1'
+      'page': '$page'
     });
-    // Await the http get response, then decode the json-formatted response.
+
     final response = await http.get(url);
-    final nowPlayingResponse = NowPlayingResponse.fromJson(response.body);
+    return response.body;
+  }
+  getOnDisplayMovies() async{
+    //Peliculas que vamos a estar mostrando
+    final jsonData = await _getJsonData('/3/movie/now_playing');
+    // Await the http get response, then decode the json-formatted response.
+    final nowPlayingResponse = NowPlayingResponse.fromJson(jsonData);
 
     // print(nowPlayingResponse.results[1].title);
     onDisplayMovies = nowPlayingResponse.results;
@@ -36,15 +42,11 @@ class MoviesProvider extends ChangeNotifier{
   }
 
   getPopularMovies() async{
+    _popularPage ++; 
     //Peliculas que vamos a estar mostrando
-    var url = Uri.https(_baseUrl, '/3/movie/popular', {
-      'api_key': _apikey,
-      'language': _language,
-      'page': '1'
-    });
+    final jsonData = await _getJsonData('/3/movie/popular', _popularPage);
     // Await the http get response, then decode the json-formatted response.
-    final response = await http.get(url);
-    final popularResponse = PopularResponse.fromJson(response.body);
+    final popularResponse = PopularResponse.fromJson(jsonData);
 
     // print(nowPlayingResponse.results[1].title);
     popularMovies = [...popularMovies, ...popularResponse.results];
